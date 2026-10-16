@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { SiteShell } from "@/components/SiteShell";
-import { SupportContact } from "@/components/SupportContact";
-import { siteConfig, supportEmailOrNull } from "@/lib/site";
+import { SupportFormSection } from "@/components/SupportFormSection";
+import { siteConfig } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Support",
@@ -16,8 +16,6 @@ export const metadata: Metadata = {
     type: "website",
   },
 };
-
-const supportEmail = supportEmailOrNull();
 
 const faqs = [
   {
@@ -38,9 +36,7 @@ const faqs = [
   },
   {
     q: "How do I report a bug or request a feature?",
-    a: supportEmail
-      ? `Email us at ${supportEmail} with your device model, iOS version, and what happened. Screenshots or screen recordings help us reproduce issues.`
-      : "Use the contact email on this page when it is published, and include your device model, iOS version, and what happened. Screenshots or screen recordings help us reproduce issues.",
+    a: "Use the contact form on this page. Include your device model, iOS version, app version, ship, and level if you can—screenshots or screen recordings help us reproduce issues.",
   },
 ];
 
@@ -53,12 +49,14 @@ export default function SupportPage() {
           We&apos;re here to help you get the most out of {siteConfig.name}.
         </p>
 
-        <div className="panel" style={{ marginBottom: "2rem" }}>
-          <h2 style={{ marginTop: 0 }}>Contact</h2>
-          <p style={{ margin: 0 }}>
-            Email: <SupportContact />
+        <div id="contact" className="panel support-contact-panel">
+          <h2 style={{ marginTop: 0 }}>Contact us</h2>
+          <p style={{ margin: "0 0 1.25rem", color: "var(--text-muted)", fontSize: "0.95rem" }}>
+            Send a message below. We&apos;ll reply to the email address you enter. Your message is
+            protected by a human verification check to reduce spam.
           </p>
-          <p style={{ margin: "0.75rem 0 0", color: "var(--text-muted)", fontSize: "0.95rem" }}>
+          <SupportFormSection />
+          <p style={{ margin: "1rem 0 0", color: "var(--text-muted)", fontSize: "0.875rem" }}>
             Developer: {siteConfig.developer}
           </p>
         </div>
@@ -75,8 +73,8 @@ export default function SupportPage() {
 
         <h2>Privacy</h2>
         <p>
-          See our <Link href="/privacy">Privacy Policy</Link> for how optional Apple services and
-          on-device features work.
+          See our <Link href="/privacy">Privacy Policy</Link> for how optional Apple services,
+          on-device features, and support messages are handled.
         </p>
       </div>
     </SiteShell>

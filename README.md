@@ -1,6 +1,6 @@
 # Nova Blaster Website
 
-Public marketing and legal pages for [Nova Blaster](https://github.com/flamurbeqiri1/novablaster) — optimized for App Store Connect **Support URL** and **Privacy Policy URL**, hosted on [Vercel](https://vercel.com).
+Public marketing and legal pages for Nova Blaster — App Store **Support URL** and **Privacy Policy URL**, hosted on [Vercel](https://vercel.com).
 
 ## Pages
 
@@ -8,31 +8,44 @@ Public marketing and legal pages for [Nova Blaster](https://github.com/flamurbeq
 |------|---------|
 | `/` | Homepage with game overview and branding |
 | `/privacy` | Privacy policy |
-| `/support` | Support contact and FAQ |
+| `/support` | FAQ and protected contact form |
+
+Support mail is delivered to a private inbox via server-side SMTP. The inbox address is **never** shown on the site.
 
 ## Local development
+
+Copy `.env.example` to `.env.local` and fill in values, then:
 
 ```bash
 npm install
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000).
+## Vercel environment variables
 
-## Deploy on Vercel (free `*.vercel.app` URL)
+Set these in the Vercel project (**Settings → Environment Variables**), for **Production** (and Preview if you test there):
 
-1. Sign in at [vercel.com](https://vercel.com) and **Add New Project** → import **`flamurbeqiri1/novablaster-website`** (Next.js preset, public repo).
-2. Deploy with defaults. Vercel sets **`VERCEL_PROJECT_PRODUCTION_URL`** on production builds so canonical URLs, Open Graph, and `sitemap.xml` use your assigned hostname (e.g. `https://novablaster-website.vercel.app`).
-3. In App Store Connect, use:
-   - **Privacy Policy URL:** `https://YOUR-PROJECT.vercel.app/privacy`
-   - **Support URL:** `https://YOUR-PROJECT.vercel.app/support`
+| Variable | Purpose |
+|----------|---------|
+| `SUPPORT_INBOX` | Private destination inbox (your Gmail) |
+| `SMTP_USER` | Gmail address used to send mail |
+| `SMTP_PASS` | [Gmail App Password](https://support.google.com/accounts/answer/185833) (not your normal password) |
+| `SMTP_HOST` | Optional, default `smtp.gmail.com` |
+| `SMTP_PORT` | Optional, default `465` |
+| `NEXT_PUBLIC_TURNSTILE_SITE_KEY` | Cloudflare Turnstile site key |
+| `TURNSTILE_SECRET_KEY` | Cloudflare Turnstile secret key |
 
-You only need **`NEXT_PUBLIC_SITE_URL`** if you add a custom domain later.
+Create Turnstile keys at [Cloudflare Dashboard → Turnstile](https://dash.cloudflare.com/?to=/:account/turnstile). Add hostnames `novablaster-website.vercel.app` and `localhost`.
+
+Redeploy after changing env vars.
+
+## App Store Connect
+
+- **Privacy Policy URL:** `https://novablaster-website.vercel.app/privacy`
+- **Support URL:** `https://novablaster-website.vercel.app/support`
+
+Optional: **`NEXT_PUBLIC_SITE_URL`** if you add a custom domain later.
 
 ## Configuration
 
-Edit [`lib/site.ts`](lib/site.ts) for **`supportEmail`** (when ready) and optional **App Store link**.
-
-## Assets
-
-App icon and launch artwork are exported from the Nova Blaster iOS project (`AppIcon-1024.png`, launch screen image).
+Edit [`lib/site.ts`](lib/site.ts) for optional **App Store link** when the listing is live.

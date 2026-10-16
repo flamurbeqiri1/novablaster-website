@@ -28,12 +28,5 @@ export const siteConfig = {
   },
   developer: "Flamur Beqiri",
   copyrightYear: 2026,
-  /** Set when ready for public support. Leave empty until you have a public inbox. */
-  supportEmail: "",
   appStoreUrl: "",
 } as const;
-
-export function supportEmailOrNull(): string | null {
-  const trimmed = siteConfig.supportEmail.trim();
-  return trimmed.length > 0 ? trimmed : null;
-}

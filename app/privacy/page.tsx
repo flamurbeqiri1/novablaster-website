@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { SiteShell } from "@/components/SiteShell";
-import { SupportContact } from "@/components/SupportContact";
-import { siteConfig, supportEmailOrNull } from "@/lib/site";
+import { siteConfig } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Privacy Policy",
@@ -102,7 +101,7 @@ export default function PrivacyPage() {
           responses on our servers.
         </p>
 
-        <h2>Website</h2>
+        <h2>Website and support messages</h2>
         <p>
           This public website ({siteConfig.url}) is hosted on Vercel. Like most web hosts, Vercel
           may process standard server logs (such as IP address, user agent, and requested URLs) for
@@ -111,6 +110,12 @@ export default function PrivacyPage() {
             Vercel&apos;s Privacy Policy
           </a>
           . We do not use cookie-based advertising trackers on this site.
+        </p>
+        <p>
+          If you use the <Link href="/support#contact">Support contact form</Link>, we collect the
+          name, email address, and message you submit so we can respond. Submissions are checked with
+          Cloudflare Turnstile to reduce automated abuse. We use your email only to reply about your
+          request; we do not sell support messages or use them for advertising lists.
         </p>
 
         <h2>App Store</h2>
@@ -139,17 +144,8 @@ export default function PrivacyPage() {
 
         <h2>Contact</h2>
         <p>
-          Questions about this policy or {siteConfig.name}:{" "}
-          {supportEmailOrNull() ? (
-            <>
-              <SupportContact /> or visit our <Link href="/support">Support</Link> page.
-            </>
-          ) : (
-            <>
-              visit our <Link href="/support">Support</Link> page (a public email will be listed there
-              before release).
-            </>
-          )}
+          Questions about this policy or {siteConfig.name}: use the contact form on our{" "}
+          <Link href="/support#contact">Support</Link> page.
         </p>
       </article>
     </SiteShell>
