@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { SiteShell } from "@/components/SiteShell";
-import { siteConfig } from "@/lib/site";
+import { SupportContact } from "@/components/SupportContact";
+import { siteConfig, supportEmailOrNull } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Privacy Policy",
@@ -133,8 +134,16 @@ export default function PrivacyPage() {
         <h2>Contact</h2>
         <p>
           Questions about this policy or {siteConfig.name}:{" "}
-          <a href={`mailto:${siteConfig.supportEmail}`}>{siteConfig.supportEmail}</a> or visit our{" "}
-          <Link href="/support">Support</Link> page.
+          {supportEmailOrNull() ? (
+            <>
+              <SupportContact /> or visit our <Link href="/support">Support</Link> page.
+            </>
+          ) : (
+            <>
+              visit our <Link href="/support">Support</Link> page (a public email will be listed there
+              before release).
+            </>
+          )}
         </p>
       </article>
     </SiteShell>

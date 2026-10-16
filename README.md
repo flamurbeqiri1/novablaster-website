@@ -19,17 +19,19 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000).
 
-## Deploy on Vercel
+## Deploy on Vercel (free `*.vercel.app` URL)
 
-1. Import this GitHub repository in Vercel (framework preset: **Next.js**).
-2. Add environment variable **`NEXT_PUBLIC_SITE_URL`** = your production URL (e.g. `https://novablaster.app`) so canonical URLs, Open Graph, and `sitemap.xml` are correct.
-3. Deploy. Use:
-   - **Privacy Policy URL:** `https://your-domain/privacy`
-   - **Support URL:** `https://your-domain/support`
+1. Sign in at [vercel.com](https://vercel.com) and **Add New Project** → import **`flamurbeqiri1/novablaster-website`** (Next.js preset, public repo).
+2. Deploy with defaults. Vercel sets **`VERCEL_PROJECT_PRODUCTION_URL`** on production builds so canonical URLs, Open Graph, and `sitemap.xml` use your assigned hostname (e.g. `https://novablaster-website.vercel.app`).
+3. In App Store Connect, use:
+   - **Privacy Policy URL:** `https://YOUR-PROJECT.vercel.app/privacy`
+   - **Support URL:** `https://YOUR-PROJECT.vercel.app/support`
+
+You only need **`NEXT_PUBLIC_SITE_URL`** if you add a custom domain later.
 
 ## Configuration
 
-Edit [`lib/site.ts`](lib/site.ts) for support email, App Store link, and default domain.
+Edit [`lib/site.ts`](lib/site.ts) for **`supportEmail`** (when ready) and optional **App Store link**.
 
 ## Assets
 

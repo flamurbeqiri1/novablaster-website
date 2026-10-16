@@ -89,11 +89,10 @@ export default function HomePage() {
         <div className="panel">
           <h2 style={{ marginTop: 0 }}>App Store links</h2>
           <p style={{ margin: 0, color: "var(--text-muted)" }}>
-            Use this site for required{" "}
+            Use this site for App Store Connect{" "}
             <Link href="/privacy">Privacy Policy</Link> and <Link href="/support">Support</Link>{" "}
-            URLs in App Store Connect. After you deploy on Vercel, set{" "}
-            <code style={{ color: "var(--accent-green)" }}>NEXT_PUBLIC_SITE_URL</code> to your
-            production domain for accurate SEO metadata.
+            URLs. On Vercel&apos;s free <code style={{ color: "var(--accent-green)" }}>*.vercel.app</code>{" "}
+            domain, production SEO URLs are picked up automatically—no custom domain required.
           </p>
         </div>
       </section>

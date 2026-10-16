@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { SiteShell } from "@/components/SiteShell";
-import { siteConfig } from "@/lib/site";
+import { SupportContact } from "@/components/SupportContact";
+import { siteConfig, supportEmailOrNull } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Support",
@@ -9,6 +10,8 @@ export const metadata: Metadata = {
   alternates: { canonical: "/support" },
   robots: { index: true, follow: true },
 };
+
+const supportEmail = supportEmailOrNull();
 
 const faqs = [
   {
@@ -29,7 +32,9 @@ const faqs = [
   },
   {
     q: "How do I report a bug or request a feature?",
-    a: `Email us at ${siteConfig.supportEmail} with your device model, iOS version, and what happened. Screenshots or screen recordings help us reproduce issues.`,
+    a: supportEmail
+      ? `Email us at ${supportEmail} with your device model, iOS version, and what happened. Screenshots or screen recordings help us reproduce issues.`
+      : "Use the contact email on this page when it is published, and include your device model, iOS version, and what happened. Screenshots or screen recordings help us reproduce issues.",
   },
 ];
 
@@ -45,8 +50,7 @@ export default function SupportPage() {
         <div className="panel" style={{ marginBottom: "2rem" }}>
           <h2 style={{ marginTop: 0 }}>Contact</h2>
           <p style={{ margin: 0 }}>
-            Email:{" "}
-            <a href={`mailto:${siteConfig.supportEmail}`}>{siteConfig.supportEmail}</a>
+            Email: <SupportContact />
           </p>
           <p style={{ margin: "0.75rem 0 0", color: "var(--text-muted)", fontSize: "0.95rem" }}>
             Developer: {siteConfig.developer} · Bundle ID: {siteConfig.bundleId}
