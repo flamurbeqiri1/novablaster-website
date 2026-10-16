@@ -61,7 +61,7 @@ export default function PrivacyPage() {
         </p>
 
         <h2>Data stored on your device</h2>
-        <p>The app stores game-related data locally on your iPhone or iPad, such as:</p>
+        <p>The app stores game-related data locally on your iPhone, such as:</p>
         <ul>
           <li>Progress, scores, unlocks, and lifetime statistics</li>
           <li>Settings such as audio preferences and selected ship</li>

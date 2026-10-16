@@ -5,7 +5,7 @@ import { SiteShell } from "@/components/SiteShell";
 import { siteConfig } from "@/lib/site";
 
 export const metadata: Metadata = {
-  title: "Offline Space Arcade Shooter for iOS",
+  title: "Offline Space Arcade Shooter for iPhone",
   description: siteConfig.description,
   alternates: { canonical: "/" },
   openGraph: {
@@ -18,7 +18,7 @@ export const metadata: Metadata = {
         url: "/images/launch-screen.jpg",
         width: 1400,
         height: 1400,
-        alt: `${siteConfig.name} — vertical space arcade shooter for iPhone and iPad`,
+        alt: `${siteConfig.name} — vertical space arcade shooter for iPhone`,
       },
     ],
   },
@@ -53,7 +53,7 @@ const features = [
   },
   {
     title: "One-touch controls",
-    body: "Hold to move and fire—fast, modern vertical arcade action tuned for iPhone and iPad.",
+    body: "Hold to move and fire—fast, modern vertical arcade action built for iPhone.",
   },
   {
     title: "On-device AI advisor",
@@ -82,6 +82,7 @@ export default function HomePage() {
         <div className="hero-content">
           <div>
             <p className="hero-eyebrow">Offline arcade action</p>
+            <p className="hero-ai-badge">{siteConfig.aiHighlight}</p>
             <h1 id="hero-heading">{siteConfig.tagline}</h1>
             <p className="hero-lead">{siteConfig.description}</p>
             <div className="hero-actions">

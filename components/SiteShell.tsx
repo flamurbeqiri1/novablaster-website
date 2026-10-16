@@ -40,7 +40,7 @@ export function SiteShell({
       <footer className="site-footer">
         <p>
           © {siteConfig.copyrightYear} {siteConfig.developer}. {siteConfig.name} — offline arcade
-          action for iOS.
+          action for iPhone.
         </p>
         <p>
           <Link href="/privacy">Privacy Policy</Link>
