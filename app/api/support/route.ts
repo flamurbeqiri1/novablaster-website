@@ -2,7 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { verifyMathChallenge } from "@/lib/math-captcha";
 import { sendSupportEmail } from "@/lib/send-support-email";
 import { checkSupportSubmission } from "@/lib/spam-guards";
-import { SUPPORT_LIMITS } from "@/lib/support-limits";
+import { firstSupportFieldError, validateSupportFields } from "@/lib/validate-support-form";
 
 type SupportBody = {
   name?: string;
@@ -13,10 +13,6 @@ type SupportBody = {
   captchaAnswer?: string;
   captchaIssuedAt?: number;
 };
-
-function isValidEmail(value: string): boolean {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
-}
 
 function clientIp(request: NextRequest): string | undefined {
   return (
@@ -38,34 +34,38 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ ok: true });
   }
 
-  const name = body.name?.trim() ?? "";
-  const email = body.email?.trim() ?? "";
-  const message = body.message?.trim() ?? "";
+  const name = body.name ?? "";
+  const email = body.email ?? "";
+  const message = body.message ?? "";
+  const captchaAnswer = body.captchaAnswer ?? "";
   const captchaToken = body.captchaToken?.trim() ?? "";
-  const captchaAnswer = body.captchaAnswer?.trim() ?? "";
 
-  if (!name || name.length > SUPPORT_LIMITS.nameMax) {
-    return NextResponse.json({ error: "Please enter your name." }, { status: 400 });
-  }
-  if (!email || email.length > SUPPORT_LIMITS.emailMax || !isValidEmail(email)) {
-    return NextResponse.json({ error: "Please enter a valid email address." }, { status: 400 });
-  }
-  if (!message) {
-    return NextResponse.json({ error: "Please enter a message." }, { status: 400 });
+  const fieldErrors = validateSupportFields({ name, email, message, captchaAnswer });
+  const fieldError = firstSupportFieldError(fieldErrors);
+  if (fieldError) {
+    return NextResponse.json({ error: fieldError }, { status: 400 });
   }
 
-  const spam = checkSupportSubmission({ email, message, clientIp: clientIp(request) });
+  const trimmedName = name.trim();
+  const trimmedEmail = email.trim();
+  const trimmedMessage = message.trim();
+
+  const spam = checkSupportSubmission({
+    email: trimmedEmail,
+    message: trimmedMessage,
+    clientIp: clientIp(request),
+  });
   if (!spam.ok) {
     return NextResponse.json({ error: spam.reason }, { status: 400 });
   }
 
-  if (!captchaToken || !captchaAnswer) {
-    return NextResponse.json({ error: "Please answer the human check." }, { status: 400 });
+  if (!captchaToken) {
+    return NextResponse.json({ error: "Human check expired. Refresh the question and try again." }, { status: 400 });
   }
 
   let human = false;
   try {
-    human = verifyMathChallenge(captchaToken, captchaAnswer, body.captchaIssuedAt);
+    human = verifyMathChallenge(captchaToken, captchaAnswer.trim(), body.captchaIssuedAt);
   } catch {
     human = false;
   }
@@ -75,7 +75,7 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    await sendSupportEmail({ name, email, message });
+    await sendSupportEmail({ name: trimmedName, email: trimmedEmail, message: trimmedMessage });
   } catch (error) {
     console.error("Support email failed:", error);
     return NextResponse.json(

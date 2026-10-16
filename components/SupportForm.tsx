@@ -4,13 +4,30 @@ import { useCallback, useState } from "react";
 import type { MathChallenge } from "@/lib/math-captcha";
 import { supportMessageTemplate } from "@/lib/support-message-template";
 import { SUPPORT_LIMITS } from "@/lib/support-limits";
+import {
+  firstSupportFieldError,
+  hasSupportFieldErrors,
+  validateSupportFields,
+  type SupportFieldErrors,
+} from "@/lib/validate-support-form";
 
 type FormState = "idle" | "submitting" | "success" | "error";
+
+function RequiredMark() {
+  return (
+    <span className="support-form-required" aria-hidden="true">
+      *
+    </span>
+  );
+}
 
 export function SupportForm({ initialChallenge }: { initialChallenge: MathChallenge }) {
   const [challenge, setChallenge] = useState(initialChallenge);
   const [formState, setFormState] = useState<FormState>("idle");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<SupportFieldErrors>({});
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
   const [captchaAnswer, setCaptchaAnswer] = useState("");
   const [refreshingCaptcha, setRefreshingCaptcha] = useState(false);
   const [message, setMessage] = useState(supportMessageTemplate);
@@ -26,6 +43,7 @@ export function SupportForm({ initialChallenge }: { initialChallenge: MathChalle
       }
       setChallenge({ prompt: data.prompt, token: data.token, issuedAt: data.issuedAt });
       setCaptchaAnswer("");
+      setFieldErrors((prev) => ({ ...prev, captchaAnswer: undefined }));
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : "Could not load a new question.");
     } finally {
@@ -37,19 +55,20 @@ export function SupportForm({ initialChallenge }: { initialChallenge: MathChalle
     event.preventDefault();
     setErrorMessage(null);
 
-    if (!captchaAnswer.trim()) {
-      setErrorMessage("Please answer the human check.");
+    const errors = validateSupportFields({ name, email, message, captchaAnswer });
+    setFieldErrors(errors);
+
+    if (hasSupportFieldErrors(errors)) {
       setFormState("error");
+      setErrorMessage(firstSupportFieldError(errors));
       return;
     }
 
-    const form = event.currentTarget;
-    const data = new FormData(form);
     const payload = {
-      name: String(data.get("name") ?? ""),
-      email: String(data.get("email") ?? ""),
-      message: String(data.get("message") ?? ""),
-      company: String(data.get("company") ?? ""),
+      name,
+      email,
+      message,
+      company: "",
       captchaToken: challenge.token,
       captchaAnswer,
       captchaIssuedAt: challenge.issuedAt,
@@ -69,9 +88,11 @@ export function SupportForm({ initialChallenge }: { initialChallenge: MathChalle
         throw new Error(result.error ?? "Something went wrong.");
       }
 
-      form.reset();
+      setName("");
+      setEmail("");
       setMessage(supportMessageTemplate);
       setCaptchaAnswer("");
+      setFieldErrors({});
       setFormState("success");
     } catch (error) {
       setFormState("error");
@@ -103,54 +124,98 @@ export function SupportForm({ initialChallenge }: { initialChallenge: MathChalle
   return (
     <form className="support-form" onSubmit={onSubmit} noValidate>
       <div className="support-form-field">
-        <label htmlFor="support-name">Name</label>
+        <label htmlFor="support-name">
+          Name <RequiredMark />
+        </label>
         <input
           id="support-name"
           name="name"
           type="text"
           autoComplete="name"
           required
-          maxLength={120}
+          minLength={2}
+          maxLength={SUPPORT_LIMITS.nameMax}
+          value={name}
+          onChange={(event) => {
+            setName(event.target.value);
+            setFieldErrors((prev) => ({ ...prev, name: undefined }));
+          }}
           disabled={formState === "submitting"}
+          aria-invalid={fieldErrors.name ? true : undefined}
+          aria-describedby={fieldErrors.name ? "support-name-error" : undefined}
         />
+        {fieldErrors.name ? (
+          <p id="support-name-error" className="support-form-field-error" role="alert">
+            {fieldErrors.name}
+          </p>
+        ) : null}
       </div>
 
       <div className="support-form-field">
-        <label htmlFor="support-email">Your email</label>
+        <label htmlFor="support-email">
+          Your email <RequiredMark />
+        </label>
         <input
           id="support-email"
           name="email"
           type="email"
           autoComplete="email"
           required
-          maxLength={254}
+          maxLength={SUPPORT_LIMITS.emailMax}
+          value={email}
+          onChange={(event) => {
+            setEmail(event.target.value);
+            setFieldErrors((prev) => ({ ...prev, email: undefined }));
+          }}
           disabled={formState === "submitting"}
+          aria-invalid={fieldErrors.email ? true : undefined}
+          aria-describedby={fieldErrors.email ? "support-email-error" : undefined}
         />
+        {fieldErrors.email ? (
+          <p id="support-email-error" className="support-form-field-error" role="alert">
+            {fieldErrors.email}
+          </p>
+        ) : null}
       </div>
 
       <div className="support-form-field">
-        <label htmlFor="support-message">Message</label>
+        <label htmlFor="support-message">
+          Message <RequiredMark />
+        </label>
         <textarea
           id="support-message"
           name="message"
           required
+          minLength={SUPPORT_LIMITS.messageMin}
           maxLength={SUPPORT_LIMITS.messageMax}
           rows={12}
           value={message}
-          onChange={(event) => setMessage(event.target.value)}
+          onChange={(event) => {
+            setMessage(event.target.value);
+            setFieldErrors((prev) => ({ ...prev, message: undefined }));
+          }}
           disabled={formState === "submitting"}
-          aria-describedby="support-message-count"
+          aria-invalid={fieldErrors.message ? true : undefined}
+          aria-describedby="support-message-count support-message-error"
         />
         <p
           id="support-message-count"
           className={`support-form-char-count${message.length >= SUPPORT_LIMITS.messageMax ? " support-form-char-count-limit" : ""}`}
         >
           {message.length.toLocaleString()} / {SUPPORT_LIMITS.messageMax.toLocaleString()} characters
+          (minimum {SUPPORT_LIMITS.messageMin})
         </p>
+        {fieldErrors.message ? (
+          <p id="support-message-error" className="support-form-field-error" role="alert">
+            {fieldErrors.message}
+          </p>
+        ) : null}
       </div>
 
       <div className="support-form-field support-form-captcha">
-        <label htmlFor="support-captcha">Human check</label>
+        <label htmlFor="support-captcha">
+          Human check <RequiredMark />
+        </label>
         <p className="support-form-captcha-prompt">{challenge.prompt}</p>
         <div className="support-form-captcha-row">
           <input
@@ -158,12 +223,17 @@ export function SupportForm({ initialChallenge }: { initialChallenge: MathChalle
             name="captchaAnswer"
             type="text"
             inputMode="numeric"
+            pattern="-?[0-9]+"
             autoComplete="off"
             required
             value={captchaAnswer}
-            onChange={(event) => setCaptchaAnswer(event.target.value)}
+            onChange={(event) => {
+              setCaptchaAnswer(event.target.value);
+              setFieldErrors((prev) => ({ ...prev, captchaAnswer: undefined }));
+            }}
             disabled={formState === "submitting" || refreshingCaptcha}
-            aria-describedby="support-captcha-hint"
+            aria-invalid={fieldErrors.captchaAnswer ? true : undefined}
+            aria-describedby="support-captcha-hint support-captcha-error"
           />
           <button
             type="button"
@@ -177,6 +247,11 @@ export function SupportForm({ initialChallenge }: { initialChallenge: MathChalle
         <p id="support-captcha-hint" className="support-form-captcha-hint">
           Answer the sum so we know you&apos;re not a bot. Wait a few seconds before sending.
         </p>
+        {fieldErrors.captchaAnswer ? (
+          <p id="support-captcha-error" className="support-form-field-error" role="alert">
+            {fieldErrors.captchaAnswer}
+          </p>
+        ) : null}
       </div>
 
       <div className="support-form-honeypot" aria-hidden="true">
@@ -189,6 +264,10 @@ export function SupportForm({ initialChallenge }: { initialChallenge: MathChalle
           {errorMessage}
         </p>
       ) : null}
+
+      <p className="support-form-required-note">
+        <RequiredMark /> Required fields
+      </p>
 
       <button
         type="submit"

@@ -83,20 +83,6 @@ function hasLongRepeatedRun(text: string): boolean {
 export function checkMessageContent(message: string): SpamCheckResult {
   const trimmed = message.trim();
 
-  if (trimmed.length < SUPPORT_LIMITS.messageMin) {
-    return {
-      ok: false,
-      reason: `Please add a bit more detail (at least ${SUPPORT_LIMITS.messageMin} characters).`,
-    };
-  }
-
-  if (trimmed.length > SUPPORT_LIMITS.messageMax) {
-    return {
-      ok: false,
-      reason: `Message is too long (max ${SUPPORT_LIMITS.messageMax} characters).`,
-    };
-  }
-
   if (countLinks(trimmed) > SUPPORT_LIMITS.maxLinksInMessage) {
     return {
       ok: false,

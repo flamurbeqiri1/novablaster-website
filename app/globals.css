@@ -351,6 +351,23 @@ img {
   color: var(--accent-cyan);
 }
 
+.support-form-required {
+  color: #ff8a9a;
+  margin-left: 0.15rem;
+}
+
+.support-form-required-note {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.support-form-field-error {
+  margin: 0.25rem 0 0;
+  font-size: 0.85rem;
+  color: #ff8a9a;
+}
+
 .support-form-field input,
 .support-form-field textarea {
   width: 100%;
