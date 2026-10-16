@@ -10,42 +10,47 @@ Public marketing and legal pages for Nova Blaster — App Store **Support URL** 
 | `/privacy` | Privacy policy |
 | `/support` | FAQ and protected contact form |
 
-Support mail is delivered to a private inbox via server-side SMTP. The inbox address is **never** shown on the site.
+Support mail goes to a **private inbox** (env var only). The address is never shown on the site.
+
+## Support form email (recommended: Resend)
+
+Gmail often **does not show “App passwords”** in Security even when 2-Step Verification is on (Workspace policies, passkey-first accounts, or Google hiding the link). You do **not** need App Passwords if you use [Resend](https://resend.com):
+
+1. Sign up at Resend with the same Gmail you want to receive support mail.
+2. Create an **API key**.
+3. In Vercel → **novablaster-website** → **Settings → Environment Variables** (Production):
+   - `SUPPORT_INBOX` = your Gmail (already set if you followed earlier setup)
+   - `RESEND_API_KEY` = your Resend API key
+4. Redeploy.
+
+Resend’s `onboarding@resend.dev` sender can deliver to the account email on the free tier without verifying a custom domain.
+
+### Gmail App Password (optional fallback)
+
+If you prefer SMTP, open this direct link while signed in:  
+**https://myaccount.google.com/apppasswords**
+
+If it says unavailable, use Resend instead and set `RESEND_API_KEY` (SMTP vars not required).
+
+## Turnstile (spam protection)
+
+Create keys at [Cloudflare Turnstile](https://dash.cloudflare.com/?to=/:account/turnstile) for hostnames `novablaster-website.vercel.app` and `localhost`:
+
+- `NEXT_PUBLIC_TURNSTILE_SITE_KEY`
+- `TURNSTILE_SECRET_KEY`
+
+Replace Cloudflare **test** keys before launch for real bot protection.
 
 ## Local development
 
-Copy `.env.example` to `.env.local` and fill in values, then:
+Copy `.env.example` to `.env.local`, fill values, then:
 
 ```bash
 npm install
 npm run dev
 ```
 
-## Vercel environment variables
-
-Set these in the Vercel project (**Settings → Environment Variables**), for **Production** (and Preview if you test there):
-
-| Variable | Purpose |
-|----------|---------|
-| `SUPPORT_INBOX` | Private destination inbox (your Gmail) |
-| `SMTP_USER` | Gmail address used to send mail |
-| `SMTP_PASS` | [Gmail App Password](https://support.google.com/accounts/answer/185833) (not your normal password) |
-| `SMTP_HOST` | Optional, default `smtp.gmail.com` |
-| `SMTP_PORT` | Optional, default `465` |
-| `NEXT_PUBLIC_TURNSTILE_SITE_KEY` | Cloudflare Turnstile site key |
-| `TURNSTILE_SECRET_KEY` | Cloudflare Turnstile secret key |
-
-Create Turnstile keys at [Cloudflare Dashboard → Turnstile](https://dash.cloudflare.com/?to=/:account/turnstile). Add hostnames `novablaster-website.vercel.app` and `localhost`.
-
-Redeploy after changing env vars.
-
 ## App Store Connect
 
 - **Privacy Policy URL:** `https://novablaster-website.vercel.app/privacy`
 - **Support URL:** `https://novablaster-website.vercel.app/support`
-
-Optional: **`NEXT_PUBLIC_SITE_URL`** if you add a custom domain later.
-
-## Configuration
-
-Edit [`lib/site.ts`](lib/site.ts) for optional **App Store link** when the listing is live.
