@@ -4,7 +4,29 @@ import { SiteShell } from "@/components/SiteShell";
 import { siteConfig } from "@/lib/site";
 
 export const metadata: Metadata = {
+  title: "Offline Space Arcade Shooter for iOS",
+  description: siteConfig.description,
   alternates: { canonical: "/" },
+  openGraph: {
+    title: `${siteConfig.name} — Blast Beyond the Stars`,
+    description: siteConfig.description,
+    url: "/",
+    type: "website",
+    images: [
+      {
+        url: "/images/launch-screen.jpg",
+        width: 1400,
+        height: 1400,
+        alt: `${siteConfig.name} — vertical space arcade shooter for iPhone and iPad`,
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: `${siteConfig.name} — Offline Space Arcade Shooter`,
+    description: siteConfig.description,
+    images: ["/images/launch-screen.jpg"],
+  },
 };
 
 const features = [
@@ -34,7 +56,7 @@ export default function HomePage() {
         <img
           className="hero-bg"
           src="/images/launch-screen.jpg"
-          alt=""
+          alt={`${siteConfig.name} — cosmic arcade shooter artwork with hero ship and Nova emblem`}
           width={1400}
           height={1400}
           fetchPriority="high"
@@ -82,18 +104,6 @@ export default function HomePage() {
               <p>{feature.body}</p>
             </article>
           ))}
-        </div>
-      </section>
-
-      <section className="section section-narrow">
-        <div className="panel">
-          <h2 style={{ marginTop: 0 }}>App Store links</h2>
-          <p style={{ margin: 0, color: "var(--text-muted)" }}>
-            Use this site for App Store Connect{" "}
-            <Link href="/privacy">Privacy Policy</Link> and <Link href="/support">Support</Link>{" "}
-            URLs. On Vercel&apos;s free <code style={{ color: "var(--accent-green)" }}>*.vercel.app</code>{" "}
-            domain, production SEO URLs are picked up automatically—no custom domain required.
-          </p>
         </div>
       </section>
     </SiteShell>

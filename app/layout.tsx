@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { organizationJsonLd, softwareApplicationJsonLd } from "@/lib/jsonld";
+import { organizationJsonLd, softwareApplicationJsonLd, webSiteJsonLd } from "@/lib/jsonld";
 import { siteConfig } from "@/lib/site";
 import "./globals.css";
 
@@ -63,7 +63,7 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
-  const jsonLd = [organizationJsonLd(), softwareApplicationJsonLd()];
+  const jsonLd = [webSiteJsonLd(), organizationJsonLd(), softwareApplicationJsonLd()];
 
   return (
     <html lang="en">

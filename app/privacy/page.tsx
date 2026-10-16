@@ -6,9 +6,15 @@ import { siteConfig, supportEmailOrNull } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Privacy Policy",
-  description: `Privacy policy for ${siteConfig.name} (${siteConfig.bundleId}) by ${siteConfig.developer}.`,
+  description: `Privacy policy for ${siteConfig.name}, the offline iOS space arcade shooter by ${siteConfig.developer}.`,
   alternates: { canonical: "/privacy" },
   robots: { index: true, follow: true },
+  openGraph: {
+    title: `Privacy Policy · ${siteConfig.name}`,
+    description: `How ${siteConfig.name} handles on-device data, optional Apple services, and this website.`,
+    url: "/privacy",
+    type: "article",
+  },
 };
 
 const effectiveDate = "October 16, 2026";
@@ -19,7 +25,7 @@ export default function PrivacyPage() {
       <article className="section prose">
         <h1>Privacy Policy</h1>
         <p className="updated">
-          Effective date: {effectiveDate} · App: {siteConfig.name} ({siteConfig.bundleId})
+          Effective date: {effectiveDate} · App: {siteConfig.name}
         </p>
 
         <p>

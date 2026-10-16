@@ -9,6 +9,20 @@ export function organizationJsonLd() {
   };
 }
 
+export function webSiteJsonLd() {
+  return {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: siteConfig.name,
+    url: siteConfig.url,
+    description: siteConfig.description,
+    publisher: {
+      "@type": "Organization",
+      name: siteConfig.developer,
+    },
+  };
+}
+
 export function softwareApplicationJsonLd() {
   return {
     "@context": "https://schema.org",

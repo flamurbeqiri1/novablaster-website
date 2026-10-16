@@ -6,9 +6,15 @@ import { siteConfig, supportEmailOrNull } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Support",
-  description: `Get help with ${siteConfig.name}: contact, troubleshooting, and FAQs.`,
+  description: `Get help with ${siteConfig.name}: troubleshooting, Game Center and iCloud tips, Nova Advisor, and contact.`,
   alternates: { canonical: "/support" },
   robots: { index: true, follow: true },
+  openGraph: {
+    title: `Support · ${siteConfig.name}`,
+    description: `Help, FAQs, and contact for ${siteConfig.name} on iOS.`,
+    url: "/support",
+    type: "website",
+  },
 };
 
 const supportEmail = supportEmailOrNull();
@@ -53,7 +59,7 @@ export default function SupportPage() {
             Email: <SupportContact />
           </p>
           <p style={{ margin: "0.75rem 0 0", color: "var(--text-muted)", fontSize: "0.95rem" }}>
-            Developer: {siteConfig.developer} · Bundle ID: {siteConfig.bundleId}
+            Developer: {siteConfig.developer}
           </p>
         </div>
 

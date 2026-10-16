@@ -28,8 +28,7 @@ export const siteConfig = {
   },
   developer: "Flamur Beqiri",
   copyrightYear: 2026,
-  bundleId: "com.novablaster.NovaBlaster",
-  /** Set when ready for App Store support URL. Leave empty until you have a public inbox. */
+  /** Set when ready for public support. Leave empty until you have a public inbox. */
   supportEmail: "",
   appStoreUrl: "",
 } as const;
