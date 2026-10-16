@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useState } from "react";
-import type { MathChallenge } from "@/lib/math-captcha";
+import type { HumanChallenge } from "@/lib/math-captcha";
 import { supportMessageTemplate } from "@/lib/support-message-template";
 import { SUPPORT_LIMITS } from "@/lib/support-limits";
 import {
@@ -21,7 +21,7 @@ function RequiredMark() {
   );
 }
 
-export function SupportForm({ initialChallenge }: { initialChallenge: MathChallenge }) {
+export function SupportForm({ initialChallenge }: { initialChallenge: HumanChallenge }) {
   const [challenge, setChallenge] = useState(initialChallenge);
   const [formState, setFormState] = useState<FormState>("idle");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -37,11 +37,17 @@ export function SupportForm({ initialChallenge }: { initialChallenge: MathChalle
     setErrorMessage(null);
     try {
       const response = await fetch("/api/support/challenge");
-      const data = (await response.json()) as MathChallenge & { error?: string };
+      const data = (await response.json()) as HumanChallenge & { error?: string };
       if (!response.ok) {
         throw new Error(data.error ?? "Could not load a new question.");
       }
-      setChallenge({ prompt: data.prompt, token: data.token, issuedAt: data.issuedAt });
+      setChallenge({
+        kind: data.kind,
+        prompt: data.prompt,
+        token: data.token,
+        issuedAt: data.issuedAt,
+        answerFormat: data.answerFormat,
+      });
       setCaptchaAnswer("");
       setFieldErrors((prev) => ({ ...prev, captchaAnswer: undefined }));
     } catch (error) {
@@ -55,7 +61,13 @@ export function SupportForm({ initialChallenge }: { initialChallenge: MathChalle
     event.preventDefault();
     setErrorMessage(null);
 
-    const errors = validateSupportFields({ name, email, message, captchaAnswer });
+    const errors = validateSupportFields({
+      name,
+      email,
+      message,
+      captchaAnswer,
+      captchaAnswerFormat: challenge.answerFormat,
+    });
     setFieldErrors(errors);
 
     if (hasSupportFieldErrors(errors)) {
@@ -222,9 +234,10 @@ export function SupportForm({ initialChallenge }: { initialChallenge: MathChalle
             id="support-captcha"
             name="captchaAnswer"
             type="text"
-            inputMode="numeric"
-            pattern="-?[0-9]+"
+            inputMode={challenge.answerFormat === "number" ? "numeric" : "text"}
+            pattern={challenge.answerFormat === "number" ? "-?[0-9]+" : "[A-Za-z]+"}
             autoComplete="off"
+            spellCheck={challenge.answerFormat === "text" ? false : undefined}
             required
             value={captchaAnswer}
             onChange={(event) => {
@@ -245,7 +258,7 @@ export function SupportForm({ initialChallenge }: { initialChallenge: MathChalle
           </button>
         </div>
         <p id="support-captcha-hint" className="support-form-captcha-hint">
-          Answer the sum so we know you&apos;re not a bot. Wait a few seconds before sending.
+          Answer the question so we know you&apos;re not a bot. Wait a few seconds before sending.
         </p>
         {fieldErrors.captchaAnswer ? (
           <p id="support-captcha-error" className="support-form-field-error" role="alert">

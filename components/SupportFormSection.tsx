@@ -1,9 +1,9 @@
 import { SupportForm } from "@/components/SupportForm";
-import { createMathChallenge } from "@/lib/math-captcha";
+import { createHumanChallenge } from "@/lib/math-captcha";
 
 export function SupportFormSection() {
   try {
-    const challenge = createMathChallenge();
+    const challenge = createHumanChallenge();
     return <SupportForm initialChallenge={challenge} />;
   } catch {
     return (

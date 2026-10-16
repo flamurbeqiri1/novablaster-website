@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { verifyMathChallenge } from "@/lib/math-captcha";
+import { verifyHumanChallenge } from "@/lib/math-captcha";
 import { sendSupportEmail } from "@/lib/send-support-email";
 import { checkSupportSubmission } from "@/lib/spam-guards";
 import { firstSupportFieldError, validateSupportFields } from "@/lib/validate-support-form";
@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
 
   let human = false;
   try {
-    human = verifyMathChallenge(captchaToken, captchaAnswer.trim(), body.captchaIssuedAt);
+    human = verifyHumanChallenge(captchaToken, captchaAnswer.trim(), body.captchaIssuedAt);
   } catch {
     human = false;
   }
