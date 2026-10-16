@@ -1,14 +1,35 @@
 import { createHmac, randomInt, timingSafeEqual } from "node:crypto";
 
+export type HumanChallengeKind = "add" | "subtract" | "sequence" | "word";
+
 type ChallengePayload = {
-  a: number;
-  b: number;
+  kind: HumanChallengeKind;
   exp: number;
   issued: number;
+  a?: number;
+  b?: number;
+  expected?: string;
 };
 
 const MIN_SUBMIT_MS = 4_000;
 const MAX_AGE_MS = 20 * 60 * 1000;
+
+const WORDS = [
+  "apple",
+  "river",
+  "cloud",
+  "orange",
+  "planet",
+  "silver",
+  "forest",
+  "monday",
+  "bridge",
+  "garden",
+  "purple",
+  "window",
+] as const;
+
+const CHALLENGE_KINDS: HumanChallengeKind[] = ["add", "subtract", "sequence", "word"];
 
 function getSigningSecret(): string {
   const secret =
@@ -41,40 +62,151 @@ function parseToken(token: string): ChallengePayload | null {
   }
 
   try {
-    const payload = JSON.parse(Buffer.from(body, "base64url").toString("utf8")) as ChallengePayload;
-    if (
-      typeof payload.a !== "number" ||
-      typeof payload.b !== "number" ||
-      typeof payload.exp !== "number" ||
-      typeof payload.issued !== "number"
-    ) {
+    const raw = JSON.parse(Buffer.from(body, "base64url").toString("utf8")) as ChallengePayload & {
+      kind?: HumanChallengeKind;
+    };
+    if (typeof raw.exp !== "number" || typeof raw.issued !== "number") {
       return null;
     }
-    return payload;
+    if (raw.kind && CHALLENGE_KINDS.includes(raw.kind)) {
+      return raw;
+    }
+    // Tokens issued before multi-kind captcha only stored add operands.
+    if (
+      typeof raw.a === "number" &&
+      typeof raw.b === "number" &&
+      raw.expected === undefined
+    ) {
+      return { kind: "add", a: raw.a, b: raw.b, exp: raw.exp, issued: raw.issued };
+    }
+    return null;
   } catch {
     return null;
   }
 }
 
-export type MathChallenge = {
+export type HumanChallengeAnswerFormat = "number" | "text";
+
+export type HumanChallenge = {
+  kind: HumanChallengeKind;
   prompt: string;
   token: string;
   issuedAt: number;
+  answerFormat: HumanChallengeAnswerFormat;
 };
 
-export function createMathChallenge(): MathChallenge {
+/** @deprecated Use HumanChallenge */
+export type MathChallenge = HumanChallenge;
+
+function answerFormatForKind(kind: HumanChallengeKind): HumanChallengeAnswerFormat {
+  return kind === "word" ? "text" : "number";
+}
+
+function buildAddChallenge(issued: number): { payload: ChallengePayload; prompt: string } {
   const a = randomInt(2, 13);
   const b = randomInt(2, 13);
-  const issued = Date.now();
-  const payload: ChallengePayload = { a, b, exp: issued + MAX_AGE_MS, issued };
   return {
+    payload: { kind: "add", a, b, exp: issued + MAX_AGE_MS, issued },
     prompt: `What is ${a} + ${b}?`,
-    token: signPayload(payload),
-    issuedAt: issued,
   };
 }
 
-export function verifyMathChallenge(
+function buildSubtractChallenge(issued: number): { payload: ChallengePayload; prompt: string } {
+  const a = randomInt(12, 28);
+  const b = randomInt(2, a - 1);
+  return {
+    payload: { kind: "subtract", a, b, exp: issued + MAX_AGE_MS, issued },
+    prompt: `What is ${a} − ${b}?`,
+  };
+}
+
+function buildSequenceChallenge(issued: number): { payload: ChallengePayload; prompt: string } {
+  const start = randomInt(2, 9);
+  const step = randomInt(2, 6);
+  const terms = [start, start + step, start + 2 * step];
+  const answer = start + 3 * step;
+  return {
+    payload: { kind: "sequence", a: answer, exp: issued + MAX_AGE_MS, issued },
+    prompt: `What number comes next? ${terms.join(", ")}, ?`,
+  };
+}
+
+function buildWordChallenge(issued: number): { payload: ChallengePayload; prompt: string } {
+  const word = WORDS[randomInt(0, WORDS.length)];
+  return {
+    payload: { kind: "word", expected: word, exp: issued + MAX_AGE_MS, issued },
+    prompt: `Type this word: ${word}`,
+  };
+}
+
+function buildChallenge(kind: HumanChallengeKind, issued: number): HumanChallenge {
+  const builders = {
+    add: buildAddChallenge,
+    subtract: buildSubtractChallenge,
+    sequence: buildSequenceChallenge,
+    word: buildWordChallenge,
+  } as const;
+
+  const { payload, prompt } = builders[kind](issued);
+  return {
+    kind,
+    prompt,
+    token: signPayload(payload),
+    issuedAt: issued,
+    answerFormat: answerFormatForKind(kind),
+  };
+}
+
+export function createHumanChallenge(): HumanChallenge {
+  const kind = CHALLENGE_KINDS[randomInt(0, CHALLENGE_KINDS.length)];
+  return buildChallenge(kind, Date.now());
+}
+
+/** @deprecated Use createHumanChallenge */
+export function createMathChallenge(): HumanChallenge {
+  return createHumanChallenge();
+}
+
+function normalizeWordAnswer(value: string): string {
+  return value.trim().toLowerCase();
+}
+
+function verifyPayloadAnswer(payload: ChallengePayload, answerRaw: string): boolean {
+  const trimmed = answerRaw.trim();
+  switch (payload.kind) {
+    case "add": {
+      if (payload.a === undefined || payload.b === undefined) {
+        return false;
+      }
+      const answer = Number.parseInt(trimmed, 10);
+      return Number.isFinite(answer) && answer === payload.a + payload.b;
+    }
+    case "subtract": {
+      if (payload.a === undefined || payload.b === undefined) {
+        return false;
+      }
+      const answer = Number.parseInt(trimmed, 10);
+      return Number.isFinite(answer) && answer === payload.a - payload.b;
+    }
+    case "sequence": {
+      if (payload.a === undefined) {
+        return false;
+      }
+      const answer = Number.parseInt(trimmed, 10);
+      return Number.isFinite(answer) && answer === payload.a;
+    }
+    case "word": {
+      if (!payload.expected) {
+        return false;
+      }
+      return normalizeWordAnswer(trimmed) === normalizeWordAnswer(payload.expected);
+    }
+    default:
+      return false;
+  }
+}
+
+export function verifyHumanChallenge(
   token: string,
   answerRaw: string,
   clientIssuedAt?: number,
@@ -98,10 +230,14 @@ export function verifyMathChallenge(
     return false;
   }
 
-  const answer = Number.parseInt(answerRaw.trim(), 10);
-  if (!Number.isFinite(answer)) {
-    return false;
-  }
+  return verifyPayloadAnswer(payload, answerRaw);
+}
 
-  return answer === payload.a + payload.b;
+/** @deprecated Use verifyHumanChallenge */
+export function verifyMathChallenge(
+  token: string,
+  answerRaw: string,
+  clientIssuedAt?: number,
+): boolean {
+  return verifyHumanChallenge(token, answerRaw, clientIssuedAt);
 }

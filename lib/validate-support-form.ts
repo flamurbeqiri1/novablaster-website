@@ -1,3 +1,4 @@
+import type { HumanChallengeAnswerFormat } from "@/lib/math-captcha";
 import { SUPPORT_LIMITS } from "@/lib/support-limits";
 
 export type SupportFieldErrors = {
@@ -22,6 +23,7 @@ export function validateSupportFields(input: {
   email: string;
   message: string;
   captchaAnswer: string;
+  captchaAnswerFormat?: HumanChallengeAnswerFormat;
 }): SupportFieldErrors {
   const errors: SupportFieldErrors = {};
 
@@ -51,10 +53,13 @@ export function validateSupportFields(input: {
   }
 
   const captchaAnswer = input.captchaAnswer.trim();
+  const answerFormat = input.captchaAnswerFormat ?? "number";
   if (!captchaAnswer) {
     errors.captchaAnswer = "Please answer the human check.";
-  } else if (!/^-?\d+$/.test(captchaAnswer)) {
+  } else if (answerFormat === "number" && !/^-?\d+$/.test(captchaAnswer)) {
     errors.captchaAnswer = "Enter a whole number for the human check.";
+  } else if (answerFormat === "text" && !/^[a-z]+$/i.test(captchaAnswer)) {
+    errors.captchaAnswer = "Enter the word using letters only.";
   }
 
   return errors;

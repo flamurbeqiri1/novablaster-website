@@ -6,7 +6,7 @@ Public marketing and legal pages for Nova Blaster — App Store **Support URL** 
 
 - Mail is sent with **Gmail SMTP** (Google App Password on Vercel).
 - The inbox address is only in env vars (`SUPPORT_INBOX`), never on the site.
-- **Human check:** simple math question, signed on the server (no third-party captcha).
+- **Human check:** random signed challenge (addition, subtraction, number sequence, or type-a-word), no third-party captcha.
 - **Honeypot**, minimum time before submit, **2,000-character** message cap with live counter, link limit, disposable-email blocklist, and per-IP rate limit (best-effort on serverless).
 
 ### Vercel environment variables (Production)
