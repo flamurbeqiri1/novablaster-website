@@ -3,6 +3,7 @@
 import { useCallback, useState } from "react";
 import type { MathChallenge } from "@/lib/math-captcha";
 import { supportMessageTemplate } from "@/lib/support-message-template";
+import { SUPPORT_LIMITS } from "@/lib/support-limits";
 
 type FormState = "idle" | "submitting" | "success" | "error";
 
@@ -12,6 +13,7 @@ export function SupportForm({ initialChallenge }: { initialChallenge: MathChalle
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [captchaAnswer, setCaptchaAnswer] = useState("");
   const [refreshingCaptcha, setRefreshingCaptcha] = useState(false);
+  const [message, setMessage] = useState(supportMessageTemplate);
 
   const refreshChallenge = useCallback(async () => {
     setRefreshingCaptcha(true);
@@ -68,6 +70,7 @@ export function SupportForm({ initialChallenge }: { initialChallenge: MathChalle
       }
 
       form.reset();
+      setMessage(supportMessageTemplate);
       setCaptchaAnswer("");
       setFormState("success");
     } catch (error) {
@@ -131,11 +134,19 @@ export function SupportForm({ initialChallenge }: { initialChallenge: MathChalle
           id="support-message"
           name="message"
           required
-          maxLength={8000}
+          maxLength={SUPPORT_LIMITS.messageMax}
           rows={12}
-          defaultValue={supportMessageTemplate}
+          value={message}
+          onChange={(event) => setMessage(event.target.value)}
           disabled={formState === "submitting"}
+          aria-describedby="support-message-count"
         />
+        <p
+          id="support-message-count"
+          className={`support-form-char-count${message.length >= SUPPORT_LIMITS.messageMax ? " support-form-char-count-limit" : ""}`}
+        >
+          {message.length.toLocaleString()} / {SUPPORT_LIMITS.messageMax.toLocaleString()} characters
+        </p>
       </div>
 
       <div className="support-form-field support-form-captcha">

@@ -1,10 +1,8 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { verifyMathChallenge } from "@/lib/math-captcha";
 import { sendSupportEmail } from "@/lib/send-support-email";
-
-const MAX_NAME = 120;
-const MAX_EMAIL = 254;
-const MAX_MESSAGE = 8000;
+import { checkSupportSubmission } from "@/lib/spam-guards";
+import { SUPPORT_LIMITS } from "@/lib/support-limits";
 
 type SupportBody = {
   name?: string;
@@ -18,6 +16,14 @@ type SupportBody = {
 
 function isValidEmail(value: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+}
+
+function clientIp(request: NextRequest): string | undefined {
+  return (
+    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
+    request.headers.get("x-real-ip") ??
+    undefined
+  );
 }
 
 export async function POST(request: NextRequest) {
@@ -38,15 +44,21 @@ export async function POST(request: NextRequest) {
   const captchaToken = body.captchaToken?.trim() ?? "";
   const captchaAnswer = body.captchaAnswer?.trim() ?? "";
 
-  if (!name || name.length > MAX_NAME) {
+  if (!name || name.length > SUPPORT_LIMITS.nameMax) {
     return NextResponse.json({ error: "Please enter your name." }, { status: 400 });
   }
-  if (!email || email.length > MAX_EMAIL || !isValidEmail(email)) {
+  if (!email || email.length > SUPPORT_LIMITS.emailMax || !isValidEmail(email)) {
     return NextResponse.json({ error: "Please enter a valid email address." }, { status: 400 });
   }
-  if (!message || message.length > MAX_MESSAGE) {
+  if (!message) {
     return NextResponse.json({ error: "Please enter a message." }, { status: 400 });
   }
+
+  const spam = checkSupportSubmission({ email, message, clientIp: clientIp(request) });
+  if (!spam.ok) {
+    return NextResponse.json({ error: spam.reason }, { status: 400 });
+  }
+
   if (!captchaToken || !captchaAnswer) {
     return NextResponse.json({ error: "Please answer the human check." }, { status: 400 });
   }

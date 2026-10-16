@@ -408,6 +408,18 @@ img {
   color: var(--text-muted);
 }
 
+.support-form-char-count {
+  margin: 0.35rem 0 0;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  text-align: right;
+}
+
+.support-form-char-count-limit {
+  color: var(--accent-orange, #ff8c1a);
+  font-weight: 600;
+}
+
 .support-form-submit {
   justify-self: start;
   border: none;
