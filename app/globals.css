@@ -200,7 +200,26 @@ img {
 .hero-actions {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   gap: 0.75rem;
+}
+
+.app-store-badge-link,
+.app-store-badge-soon {
+  display: inline-block;
+  line-height: 0;
+  border-radius: 8px;
+  transition: transform 0.15s ease, opacity 0.15s ease;
+}
+
+.app-store-badge-link:hover {
+  transform: scale(1.03);
+  opacity: 0.92;
+}
+
+.app-store-badge-soon {
+  opacity: 0.92;
+  filter: drop-shadow(0 6px 16px rgba(0, 0, 0, 0.35));
 }
 
 .btn {

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { AppStoreBadge } from "@/components/AppStoreBadge";
 import { SiteShell } from "@/components/SiteShell";
 import { siteConfig } from "@/lib/site";
 
@@ -68,15 +69,7 @@ export default function HomePage() {
             <h1 id="hero-heading">{siteConfig.tagline}</h1>
             <p className="hero-lead">{siteConfig.description}</p>
             <div className="hero-actions">
-              {siteConfig.appStoreUrl ? (
-                <a className="btn btn-primary" href={siteConfig.appStoreUrl}>
-                  Download on the App Store
-                </a>
-              ) : (
-                <span className="btn btn-primary" style={{ opacity: 0.85 }}>
-                  Coming to the App Store
-                </span>
-              )}
+              <AppStoreBadge />
               <Link className="btn btn-secondary" href="/support">
                 Get support
               </Link>
