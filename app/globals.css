@@ -377,8 +377,35 @@ img {
   overflow: hidden;
 }
 
-.support-form-turnstile {
-  min-height: 65px;
+.support-form-captcha-prompt {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+.support-form-captcha-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.support-form-captcha-row input {
+  width: 5.5rem;
+  flex: 0 0 auto;
+}
+
+.support-form-captcha-refresh {
+  padding: 0.5rem 0.85rem;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.support-form-captcha-hint {
+  margin: 0.35rem 0 0;
+  font-size: 0.85rem;
+  color: var(--text-muted);
 }
 
 .support-form-submit {

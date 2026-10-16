@@ -52,8 +52,8 @@ export default function SupportPage() {
         <div id="contact" className="panel support-contact-panel">
           <h2 style={{ marginTop: 0 }}>Contact us</h2>
           <p style={{ margin: "0 0 1.25rem", color: "var(--text-muted)", fontSize: "0.95rem" }}>
-            Send a message below. We&apos;ll reply to the email address you enter. Your message is
-            protected by a human verification check to reduce spam.
+            Send a message below. We&apos;ll reply to the email address you enter. A short human
+            check on this page helps reduce spam.
           </p>
           <SupportFormSection />
           <p style={{ margin: "1rem 0 0", color: "var(--text-muted)", fontSize: "0.875rem" }}>

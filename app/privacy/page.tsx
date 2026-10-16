@@ -113,9 +113,9 @@ export default function PrivacyPage() {
         </p>
         <p>
           If you use the <Link href="/support#contact">Support contact form</Link>, we collect the
-          name, email address, and message you submit so we can respond. Submissions are checked with
-          Cloudflare Turnstile to reduce automated abuse. We use your email only to reply about your
-          request; we do not sell support messages or use them for advertising lists.
+          name, email address, and message you submit so we can respond. Submissions include a simple
+          verification step on our server to reduce automated abuse. We use your email only to reply
+          about your request; we do not sell support messages or use them for advertising lists.
         </p>
 
         <h2>App Store</h2>

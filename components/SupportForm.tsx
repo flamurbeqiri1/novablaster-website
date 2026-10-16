@@ -1,23 +1,42 @@
 "use client";
 
-import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
-import { useRef, useState } from "react";
+import { useCallback, useState } from "react";
+import type { MathChallenge } from "@/lib/math-captcha";
 import { supportMessageTemplate } from "@/lib/support-message-template";
 
 type FormState = "idle" | "submitting" | "success" | "error";
 
-export function SupportForm({ siteKey }: { siteKey: string }) {
-  const turnstileRef = useRef<TurnstileInstance | null>(null);
+export function SupportForm({ initialChallenge }: { initialChallenge: MathChallenge }) {
+  const [challenge, setChallenge] = useState(initialChallenge);
   const [formState, setFormState] = useState<FormState>("idle");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const [captchaAnswer, setCaptchaAnswer] = useState("");
+  const [refreshingCaptcha, setRefreshingCaptcha] = useState(false);
+
+  const refreshChallenge = useCallback(async () => {
+    setRefreshingCaptcha(true);
+    setErrorMessage(null);
+    try {
+      const response = await fetch("/api/support/challenge");
+      const data = (await response.json()) as MathChallenge & { error?: string };
+      if (!response.ok) {
+        throw new Error(data.error ?? "Could not load a new question.");
+      }
+      setChallenge({ prompt: data.prompt, token: data.token, issuedAt: data.issuedAt });
+      setCaptchaAnswer("");
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : "Could not load a new question.");
+    } finally {
+      setRefreshingCaptcha(false);
+    }
+  }, []);
 
   async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setErrorMessage(null);
 
-    if (!turnstileToken) {
-      setErrorMessage("Please complete the human check below.");
+    if (!captchaAnswer.trim()) {
+      setErrorMessage("Please answer the human check.");
       setFormState("error");
       return;
     }
@@ -29,7 +48,9 @@ export function SupportForm({ siteKey }: { siteKey: string }) {
       email: String(data.get("email") ?? ""),
       message: String(data.get("message") ?? ""),
       company: String(data.get("company") ?? ""),
-      turnstileToken,
+      captchaToken: challenge.token,
+      captchaAnswer,
+      captchaIssuedAt: challenge.issuedAt,
     };
 
     setFormState("submitting");
@@ -47,14 +68,12 @@ export function SupportForm({ siteKey }: { siteKey: string }) {
       }
 
       form.reset();
-      setTurnstileToken(null);
-      turnstileRef.current?.reset();
+      setCaptchaAnswer("");
       setFormState("success");
     } catch (error) {
       setFormState("error");
       setErrorMessage(error instanceof Error ? error.message : "Something went wrong.");
-      turnstileRef.current?.reset();
-      setTurnstileToken(null);
+      await refreshChallenge();
     }
   }
 
@@ -67,7 +86,10 @@ export function SupportForm({ siteKey }: { siteKey: string }) {
         <button
           type="button"
           className="btn btn-secondary support-form-reset"
-          onClick={() => setFormState("idle")}
+          onClick={() => {
+            void refreshChallenge();
+            setFormState("idle");
+          }}
         >
           Send another message
         </button>
@@ -116,20 +138,39 @@ export function SupportForm({ siteKey }: { siteKey: string }) {
         />
       </div>
 
+      <div className="support-form-field support-form-captcha">
+        <label htmlFor="support-captcha">Human check</label>
+        <p className="support-form-captcha-prompt">{challenge.prompt}</p>
+        <div className="support-form-captcha-row">
+          <input
+            id="support-captcha"
+            name="captchaAnswer"
+            type="text"
+            inputMode="numeric"
+            autoComplete="off"
+            required
+            value={captchaAnswer}
+            onChange={(event) => setCaptchaAnswer(event.target.value)}
+            disabled={formState === "submitting" || refreshingCaptcha}
+            aria-describedby="support-captcha-hint"
+          />
+          <button
+            type="button"
+            className="btn btn-secondary support-form-captcha-refresh"
+            onClick={() => void refreshChallenge()}
+            disabled={formState === "submitting" || refreshingCaptcha}
+          >
+            New question
+          </button>
+        </div>
+        <p id="support-captcha-hint" className="support-form-captcha-hint">
+          Answer the sum so we know you&apos;re not a bot. Wait a few seconds before sending.
+        </p>
+      </div>
+
       <div className="support-form-honeypot" aria-hidden="true">
         <label htmlFor="support-company">Company</label>
         <input id="support-company" name="company" type="text" tabIndex={-1} autoComplete="off" />
-      </div>
-
-      <div className="support-form-turnstile">
-        <Turnstile
-          ref={turnstileRef}
-          siteKey={siteKey}
-          onSuccess={setTurnstileToken}
-          onExpire={() => setTurnstileToken(null)}
-          onError={() => setTurnstileToken(null)}
-          options={{ theme: "dark", size: "normal" }}
-        />
       </div>
 
       {errorMessage ? (
@@ -141,7 +182,7 @@ export function SupportForm({ siteKey }: { siteKey: string }) {
       <button
         type="submit"
         className="btn btn-primary support-form-submit"
-        disabled={formState === "submitting" || !turnstileToken}
+        disabled={formState === "submitting" || refreshingCaptcha}
       >
         {formState === "submitting" ? "Sending…" : "Send message"}
       </button>

@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { verifyMathChallenge } from "@/lib/math-captcha";
 import { sendSupportEmail } from "@/lib/send-support-email";
-import { verifyTurnstileToken } from "@/lib/turnstile";
 
 const MAX_NAME = 120;
 const MAX_EMAIL = 254;
@@ -10,8 +10,10 @@ type SupportBody = {
   name?: string;
   email?: string;
   message?: string;
-  turnstileToken?: string;
   company?: string;
+  captchaToken?: string;
+  captchaAnswer?: string;
+  captchaIssuedAt?: number;
 };
 
 function isValidEmail(value: string): boolean {
@@ -33,7 +35,8 @@ export async function POST(request: NextRequest) {
   const name = body.name?.trim() ?? "";
   const email = body.email?.trim() ?? "";
   const message = body.message?.trim() ?? "";
-  const turnstileToken = body.turnstileToken?.trim() ?? "";
+  const captchaToken = body.captchaToken?.trim() ?? "";
+  const captchaAnswer = body.captchaAnswer?.trim() ?? "";
 
   if (!name || name.length > MAX_NAME) {
     return NextResponse.json({ error: "Please enter your name." }, { status: 400 });
@@ -44,18 +47,19 @@ export async function POST(request: NextRequest) {
   if (!message || message.length > MAX_MESSAGE) {
     return NextResponse.json({ error: "Please enter a message." }, { status: 400 });
   }
-  if (!turnstileToken) {
-    return NextResponse.json({ error: "Please complete the human check." }, { status: 400 });
+  if (!captchaToken || !captchaAnswer) {
+    return NextResponse.json({ error: "Please answer the human check." }, { status: 400 });
   }
 
-  const remoteIp =
-    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
-    request.headers.get("x-real-ip") ??
-    undefined;
+  let human = false;
+  try {
+    human = verifyMathChallenge(captchaToken, captchaAnswer, body.captchaIssuedAt);
+  } catch {
+    human = false;
+  }
 
-  const human = await verifyTurnstileToken(turnstileToken, remoteIp);
   if (!human) {
-    return NextResponse.json({ error: "Human check failed. Try again." }, { status: 403 });
+    return NextResponse.json({ error: "Human check failed. Check your answer and try again." }, { status: 403 });
   }
 
   try {
