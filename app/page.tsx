@@ -32,20 +32,36 @@ export const metadata: Metadata = {
 
 const features = [
   {
-    title: "Play offline",
-    body: "Core gameplay runs without an internet connection. Optional Game Center and iCloud features use Apple services when you choose to use them.",
+    title: "Offline arcade action",
+    body: "Play endless space battles with no internet required. Optional Game Center and iCloud use Apple services only when you turn them on.",
   },
   {
-    title: "Three ships, deep weapons",
-    body: "Pilot distinct ships and power up Bullet, Triple Spread, and Fireball across strength tiers as levels escalate.",
+    title: "Different ships",
+    body: "Choose a ship that fits your style—each changes speed, fire rate, hull, and starting lives as you push for a better run.",
   },
   {
-    title: "Endless challenge",
-    body: "Procedural levels, tactical formations, hazards, and boss battles built for quick runs and high-score chases.",
+    title: "Upgradeable weapons",
+    body: "Power up Bullet, Triple Spread, and Fireball across deep strength tiers and adapt as enemy pressure ramps up.",
   },
   {
-    title: "Nova Advisor",
-    body: "On compatible devices, on-device AI can vary coaching tips and boss dialogue. Everywhere else, reliable built-in lines keep play moving.",
+    title: "Endless procedural levels",
+    body: "Survive scaling difficulty, survival objectives, and an endless sequence of levels built for quick sessions and long high-score chases.",
+  },
+  {
+    title: "Tactical bosses & hazards",
+    body: "Break through formations, dodge world objects and hazards, and face a rotating roster of bosses with distinct attack patterns.",
+  },
+  {
+    title: "One-touch controls",
+    body: "Hold to move and fire—fast, modern vertical arcade action tuned for iPhone and iPad.",
+  },
+  {
+    title: "On-device AI advisor",
+    body: "Nova Advisor delivers short coaching tips between levels. On compatible devices, on-device AI can vary tips and boss dialogue; built-in lines everywhere else.",
+  },
+  {
+    title: "Leaderboards & progress",
+    body: "Climb Game Center leaderboards, unlock achievements, improve your pilot rank, and sync lifetime stats with iCloud on the same Apple ID.",
   },
 ];
 

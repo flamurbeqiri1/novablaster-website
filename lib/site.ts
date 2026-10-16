@@ -3,7 +3,7 @@ export const siteConfig = {
   name: "Nova Blaster",
   tagline: "Blast beyond the stars",
   description:
-    "Nova Blaster is a fast offline vertical arcade space shooter for iPhone and iPad. Choose your ship, upgrade weapons, survive endless levels and boss battles, and climb Game Center leaderboards.",
+    "Nova Blaster is a fast offline vertical arcade space shooter for iPhone and iPad. Pick a ship, power up your weapons, survive endless procedural levels and tactical boss battles, and chase high scores on Game Center.",
   /**
    * Canonical site URL. On Vercel production, `VERCEL_PROJECT_PRODUCTION_URL` is set automatically
    * (your free *.vercel.app domain). Override with NEXT_PUBLIC_SITE_URL only if you add a custom domain later.
